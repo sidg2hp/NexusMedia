@@ -339,8 +339,3 @@ The application will be available locally for development.
 * Mobile application support
 * Real-time collaborative collections
 
----
-
-## License
-
-This project is licensed under the MIT License.

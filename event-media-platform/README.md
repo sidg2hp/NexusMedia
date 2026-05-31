@@ -1,52 +1,76 @@
-# Event Media Platform 📸
+# NexusMedia 📸 (formerly Event Media)
 
-A powerful, AI-driven event media management platform built with **Next.js 15**, **Prisma**, **Tailwind CSS**, and **AWS Services** (S3 and Rekognition).
+A highly scalable, AI-driven Event & Media Management Platform built with **Next.js 15 (App Router)**, **Prisma**, **AWS S3**, and **AWS Rekognition**. 
 
-This platform allows users to create events, upload media (photos and videos), and securely manage access. It leverages AWS AI services to automatically tag photos and provides a magical "Find Me" facial recognition feature to instantly pull up any photos you appear in.
-
-## 🌟 Core Features
-
-### 1. Event Management
-- **Create & Manage**: Organizers can create public or private events.
-- **Edit & Delete**: Seamlessly edit event details (name, description, date, category, visibility).
-- **Sorting & Filtering**: Find events quickly by name, category, or date.
-
-### 2. Media Upload & Optimization
-- **Drag & Drop Upload**: Bulk upload media directly to AWS S3.
-- **Client-Side Compression**: High-res images are automatically compressed in the browser before upload (saving massive cloud storage costs) using `browser-image-compression`.
-- **Pre-signed URLs**: Secure, direct-to-S3 uploads without bottlenecking the Node.js server.
-
-### 3. AI Facial Recognition & Tagging (AWS Rekognition)
-- **Smart Image Tagging**: Every uploaded photo is scanned by AWS Rekognition to automatically generate searchable tags (e.g., mountains, crowd, sports).
-- **Find Me (Facial Recognition)**: Upload a reference selfie, and the platform will instantly scan the database to find and compile a gallery of every photo you appear in across all events! 
-
-### 4. Social Interactions & Notifications
-- **Like, Comment, & Share**: Fully interactive media gallery.
-- **Real-Time Notification Bell**: Receive notifications whenever someone likes or comments on your media.
-
-### 5. Advanced Watermarking
-- **Dynamic Overlays**: Clicking the "Download" button fetches the original image from S3, uses the `sharp` library to dynamically overlay a text watermark (Event Name & Role), and streams the secure download to the user.
-
-### 6. Authentication & Roles
-- Custom JWT-based authentication.
-- Built-in Role enum (`ADMIN`, `PHOTOGRAPHER`, `CLUB_MEMBER`, `VIEWER`) for future access control expansions.
+Designed to solve the problem of scattered club event photos by providing centralized organization, facial recognition-based personal discovery, real-time social interactions, and strict access control.
 
 ---
 
-## 🛠️ Technology Stack
-- **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL
-- **Cloud Storage**: AWS S3
-- **AI/ML**: AWS Rekognition
-- **Image Processing**: Sharp (Server), Browser-Image-Compression (Client)
+## 🌟 Hackathon Core Features Delivered
+
+### 1. Advanced AI/ML Integration (AWS Rekognition)
+- **"Find Me" Facial Recognition**: Users can upload a reference selfie. The system maps their facial vector and automatically compiles a personalized gallery of every photo they appear in across all events.
+- **Smart Image Tagging**: Every uploaded photo is automatically scanned by AI to generate semantic tags (e.g., *mountain, crowd, sports*).
+- **Global Search**: Search the entire platform's media by AI Tags, Uploader Name, Event Name, or Date.
+
+### 2. Cloud Architecture (AWS S3 & Rekognition Cross-Region)
+- **Direct-to-S3 Uploads**: Uses Pre-signed URLs for highly scalable, direct browser-to-cloud uploads, bypassing the Node server.
+- **Cross-Region AI Execution**: Intelligently streams S3 object bytes to AWS Rekognition servers across regions to bypass strict AWS regional availability limitations.
+
+### 3. Smart Media Compression & Delivery
+- **Client-Side Compression**: Uses Web Workers and `browser-image-compression` to resize and compress heavy images on the user's device *before* upload, drastically reducing cloud storage costs and bandwidth.
+
+### 4. Dynamic Watermarking System
+- **Real-time Image Processing**: The `GET /api/media/watermark` endpoint uses `sharp` to dynamically overlay an SVG watermark containing the `Event Name` and `User Role` onto the S3 image buffer during the download stream.
+
+### 5. Event Management & Security
+- **Organizers Hub**: Create, edit, and delete events. Toggle visibility between Public and Private.
+- **Role-Based Access Control**: JWT payload contains `Role` enums (`ADMIN`, `PHOTOGRAPHER`, `CLUB_MEMBER`, `VIEWER`) used to restrict access and uploads.
+
+### 6. Social Networking
+- **Real-Time Notification Bell**: Receive alerts when users comment or like your photos.
+- **Full Social Suite**: Like, Comment, and Share features built directly into the Glassmorphic Gallery UI.
+
+---
+
+## 🏗️ Architecture Diagram
+
+```mermaid
+graph TD
+    Client[Next.js Client UI] -->|Direct Upload| S3[(AWS S3 Bucket)]
+    Client -->|API Requests| Server[Next.js API Routes]
+    
+    Server -->|Read/Write| DB[(PostgreSQL + Prisma)]
+    Server -->|Generate Presigned URLs| S3
+    
+    Server -->|Byte Streams| Rekognition[AWS Rekognition]
+    Rekognition -->|Detect Labels| Tags[AI Tags]
+    Rekognition -->|IndexFaces| FaceCollection[(Face Collection)]
+    
+    Client -->|Download Request| WatermarkAPI[Watermark API]
+    WatermarkAPI -->|Fetch Original| S3
+    WatermarkAPI -->|Sharp processing| Client
+```
+
+---
+
+## 🗄️ Database Schema Overview
+
+The database uses PostgreSQL managed by Prisma ORM. Key entities include:
+
+- **User**: Stores authentication details, Role (`ADMIN`, `VIEWER`, etc.), and `referenceSelfieUrl` for facial recognition.
+- **Event**: Contains event metadata (name, date, category, description) and links to the Organizer (User).
+- **Media**: Represents a photo/video. Stores the S3 URL, `isPublic` flag, and relationships to `Event` and `User`.
+- **Like / Comment / Favourite**: Join tables connecting Users to Media for social interactions.
+- **Notification**: Stores real-time alerts for users (e.g., "Someone commented on your photo").
+- **Tag & TagsOnMedia**: Many-to-many relationship mapping AI-generated AWS Rekognition labels to specific media files.
 
 ---
 
 ## 🚀 Setup Instructions
 
 ### 1. Environment Variables
-Create a `.env` file in the root directory and add the following keys:
+Create a `.env` file in the root directory:
 ```env
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/eventmedia"
@@ -57,30 +81,20 @@ JWT_SECRET="your-super-secret-jwt-key"
 # AWS Configuration
 AWS_ACCESS_KEY_ID="your-aws-access-key"
 AWS_SECRET_ACCESS_KEY="your-aws-secret-key"
-AWS_REGION="eu-north-1" # Region for your S3 Bucket
+AWS_REGION="eu-north-1" # Your S3 Bucket Region
 AWS_S3_BUCKET_NAME="your-bucket-name"
 ```
-*(Note: AWS Rekognition runs in `eu-central-1` as a workaround for regions that do not support it natively).*
+*(AWS Rekognition automatically routes to `eu-central-1` to ensure availability).*
 
 ### 2. AWS Setup
-Your AWS IAM User requires the following policies:
-- `AmazonS3FullAccess`
-- `AmazonRekognitionFullAccess`
+Your AWS IAM User requires: `AmazonS3FullAccess` and `AmazonRekognitionFullAccess`.
+Ensure your S3 bucket has a Public Read bucket policy and CORS configured for `PUT` requests.
 
-Your S3 Bucket must have a **Bucket Policy** granting `s3:GetObject` to `*` for public viewing.
-
-### 3. Install Dependencies
+### 3. Installation
 ```bash
 npm install
-```
-
-### 4. Database Setup
-```bash
 npx prisma db push
-```
-
-### 5. Run the Development Server
-```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+Open [http://localhost:3000](http://localhost:3000) to start exploring NexusMedia!

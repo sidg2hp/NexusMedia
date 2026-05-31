@@ -13,15 +13,20 @@ const Header = async () => {
       <div className="container mx-auto flex justify-between items-center p-4">
         <Link href="/" className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/50">
-            <span className="text-white text-lg">E</span>
+            <span className="text-white text-lg">N</span>
           </div>
-          EventMedia
+          NexusMedia
         </Link>
         <nav>
           <ul className="flex space-x-8 items-center">
             <li>
               <Link href="/events" className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">
                 Explore
+              </Link>
+            </li>
+            <li>
+              <Link href="/search" className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">
+                Search
               </Link>
             </li>
             {isLoggedIn && (

@@ -5,12 +5,14 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center animate-fade-in">
       <div className="glass-card p-12 max-w-4xl mx-auto flex flex-col items-center">
-        <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-white tracking-tight">
-          Capture. Organize. <span className="text-gradient">Experience.</span>
+        <div className="text-center mb-16 relative z-10">
+        <h1 className="text-6xl font-extrabold text-white mb-6 tracking-tight">
+          Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-secondary">NexusMedia</span>
         </h1>
-        <p className="text-xl text-gray-300 mb-10 max-w-2xl leading-relaxed">
-          The centralized Event & Media Management Platform. Effortlessly organize event media, tag friends using AI, and manage access like never before.
+        <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          The ultimate AI-powered platform for clubs and societies to organize, discover, and interact with event memories seamlessly.
         </p>
+        </div>
         
         <div className="flex gap-4 mb-16">
           <Link href="/events" className="px-8 py-4 bg-primary hover:bg-primary/90 text-white rounded-full font-semibold transition-all transform hover:scale-105 shadow-lg shadow-primary/30 flex items-center gap-2">

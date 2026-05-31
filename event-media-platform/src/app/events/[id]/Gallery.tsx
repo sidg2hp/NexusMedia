@@ -3,9 +3,12 @@ import { useState } from 'react';
 import { HeartIcon as HeartOutline, ChatBubbleLeftIcon, ArrowDownTrayIcon, BookmarkIcon as BookmarkOutline, ShareIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid';
 
+import CommentModal from './CommentModal';
+
 export default function Gallery({ initialMedia, eventId }: { initialMedia: any[], eventId: string }) {
   const [mediaList, setMediaList] = useState(initialMedia);
   const [loading, setLoading] = useState(false);
+  const [activeCommentMedia, setActiveCommentMedia] = useState<any>(null);
 
   const loadMore = async () => {
     setLoading(true);
@@ -69,7 +72,7 @@ export default function Gallery({ initialMedia, eventId }: { initialMedia: any[]
                     <HeartSolid className="w-6 h-6 hidden group-hover/btn:block text-secondary" />
                     <span className="text-xs">{media._count?.likes || 0}</span>
                   </button>
-                  <button className="text-white hover:text-primary transition-colors flex flex-col items-center" onClick={() => alert("Comments UI coming soon!")}>
+                  <button className="text-white hover:text-primary transition-colors flex flex-col items-center" onClick={() => setActiveCommentMedia(media)}>
                     <ChatBubbleLeftIcon className="w-6 h-6" />
                     <span className="text-xs">{media._count?.comments || 0}</span>
                   </button>
@@ -91,6 +94,13 @@ export default function Gallery({ initialMedia, eventId }: { initialMedia: any[]
             {loading ? 'Loading...' : 'Load More'}
           </button>
         </div>
+      )}
+
+      {activeCommentMedia && (
+        <CommentModal 
+          media={activeCommentMedia} 
+          onClose={() => setActiveCommentMedia(null)} 
+        />
       )}
     </div>
   );

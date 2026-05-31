@@ -59,7 +59,7 @@ export async function GET(req: Request) {
     }
 
     // 2. Generate Watermark SVG
-    const watermarkText = `Event Media Platform - ${media.event.name} - Downloaded by ${userRole}`;
+    const watermarkText = `NexusMedia - ${media.event.name} - Downloaded by ${userRole}`;
     
     const svgWatermark = `
       <svg width="800" height="100">

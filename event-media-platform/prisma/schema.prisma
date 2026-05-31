@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  name               String?
+  password           String
+  role               Role     @default(VIEWER)
+  referenceSelfieUrl String? // For facial recognition
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  uploadedMedia Media[]
+  comments      Comment[]
+  likes         Like[]
+  favourites    Favourite[]
+  notifications Notification[]
+  taggedIn      UserTag[]
+  organizedEvents Event[] @relation("EventOrganizer")
+}
+
+enum Role {
+  ADMIN
+  PHOTOGRAPHER
+  CLUB_MEMBER
+  VIEWER
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String?
+  isPublic    Boolean  @default(true) // Access control at event level
+  date        DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  organizerId String?
+  organizer   User?    @relation("EventOrganizer", fields: [organizerId], references: [id])
+
+  media Media[]
+}
+
+model Media {
+  id           String   @id @default(cuid())
+  url          String
+  key          String   @unique // The key of the object in S3
+  type         String // "PHOTO" or "VIDEO"
+  isPublic     Boolean  @default(true) // Access control at media level
+  status       String   @default("ACTIVE") // For moderation
+  watermarkUrl String? // URL for watermarked version if generated
+  uploadedById String
+  eventId      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  uploadedBy   User          @relation(fields: [uploadedById], references: [id])
+  event        Event         @relation(fields: [eventId], references: [id])
+  comments     Comment[]
+  likes        Like[]
+  tags         TagsOnMedia[]
+  favouritedBy Favourite[]
+  userTags     UserTag[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  authorId  String
+  mediaId   String
+  createdAt DateTime @default(now())
+
+  author User  @relation(fields: [authorId], references: [id])
+  media  Media @relation(fields: [mediaId], references: [id])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  mediaId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  media Media @relation(fields: [mediaId], references: [id])
+
+  @@unique([userId, mediaId])
+}
+
+model Favourite {
+  id        String   @id @default(cuid())
+  userId    String
+  mediaId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  media Media @relation(fields: [mediaId], references: [id])
+
+  @@unique([userId, mediaId])
+}
+
+model Tag {
+  id    String        @id @default(cuid())
+  name  String        @unique
+  media TagsOnMedia[]
+}
+
+model TagsOnMedia {
+  mediaId String
+  tagId   String
+
+  media Media @relation(fields: [mediaId], references: [id])
+  tag   Tag   @relation(fields: [tagId], references: [id])
+
+  @@id([mediaId, tagId])
+}
+
+model UserTag {
+  id        String   @id @default(cuid())
+  userId    String
+  mediaId   String
+  x         Float? // Optional coordinates for the tag
+  y         Float?
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  media Media @relation(fields: [mediaId], references: [id])
+
+  @@unique([userId, mediaId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  message   String
+  type      String // e.g., "LIKE", "COMMENT", "TAG"
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}

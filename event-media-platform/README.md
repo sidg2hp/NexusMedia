@@ -54,16 +54,64 @@ graph TD
 
 ---
 
-## 🗄️ Database Schema Overview
+## 🗄️ Database Schema (Prisma)
 
-The database uses PostgreSQL managed by Prisma ORM. Key entities include:
+The database uses PostgreSQL managed by Prisma ORM. Below is the core schema:
 
-- **User**: Stores authentication details, Role (`ADMIN`, `VIEWER`, etc.), and `referenceSelfieUrl` for facial recognition.
-- **Event**: Contains event metadata (name, date, category, description) and links to the Organizer (User).
-- **Media**: Represents a photo/video. Stores the S3 URL, `isPublic` flag, and relationships to `Event` and `User`.
-- **Like / Comment / Favourite**: Join tables connecting Users to Media for social interactions.
-- **Notification**: Stores real-time alerts for users (e.g., "Someone commented on your photo").
-- **Tag & TagsOnMedia**: Many-to-many relationship mapping AI-generated AWS Rekognition labels to specific media files.
+```prisma
+model User {
+  id                 String         @id @default(cuid())
+  name               String
+  email              String         @unique
+  password           String
+  role               Role           @default(VIEWER)
+  referenceSelfieUrl String?
+  events             Event[]        // Events organized by user
+  media              Media[]        // Media uploaded by user
+  likes              Like[]
+  comments           Comment[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  date        DateTime
+  category    String?
+  isPublic    Boolean  @default(true)
+  organizerId String
+  media       Media[]
+}
+
+model Media {
+  id           String        @id @default(cuid())
+  url          String
+  key          String
+  type         String
+  isPublic     Boolean       @default(true)
+  uploadedById String
+  eventId      String
+  tags         TagsOnMedia[]
+}
+```
+
+---
+
+## 🔌 API Documentation
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| **POST** | `/api/auth/register` | Register a new user with hashed passwords. |
+| **POST** | `/api/auth/login` | Authenticate user & return HttpOnly JWT cookie. |
+| **POST** | `/api/auth/selfie` | Upload selfie, index in AWS Rekognition. |
+| **GET** | `/api/events` | Fetch all events (supports filtering & sorting). |
+| **POST** | `/api/events` | Create a new event (Organizer role required). |
+| **PUT** | `/api/events/[id]` | Update event details & visibility. |
+| **POST** | `/api/media/upload-url` | Generate AWS S3 pre-signed URL for direct upload. |
+| **POST** | `/api/media` | Save media to DB and trigger async AWS Rekognition Tagging & Face Indexing. |
+| **GET** | `/api/media/search-faces` | Scan entire platform for photos matching user's reference selfie. |
+| **GET** | `/api/media/watermark` | Generate a dynamic watermark and stream file for download. |
+| **GET** | `/api/search` | Global search by tags, uploader name, event name, or date. |
 
 ---
 

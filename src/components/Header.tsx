@@ -30,7 +30,7 @@ const Header = async () => {
               </Link>
             </li>
             <li>
-              <Link href="/events/create" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+              <Link href={isLoggedIn ? "/events/create" : "/register"} className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200">
                 + Create Event
               </Link>
             </li>

@@ -10,7 +10,7 @@ export default function EventActions({ event }: { event: any }) {
     description: event.description || '',
     category: event.category || '',
     isPublic: event.isPublic,
-    date: event.date.split('T')[0], // format for date input
+    date: event.date ? new Date(event.date).toISOString().split('T')[0] : '', // format for date input
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();

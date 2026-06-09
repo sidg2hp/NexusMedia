@@ -5,10 +5,8 @@ export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    // We can just clear the cookie by making a small request or clearing it directly
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.refresh();
-    router.push('/');
+    window.location.href = '/';
   };
 
   return (

@@ -51,7 +51,7 @@ const Header = async () => {
                     Sign In
                   </Link>
                   <Link href="/register" className="text-sm font-medium px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors duration-200">
-                    Join Now
+                    Sign Up
                   </Link>
                 </>
               )}

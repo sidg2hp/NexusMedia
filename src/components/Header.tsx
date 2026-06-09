@@ -29,13 +29,11 @@ const Header = async () => {
                 Search
               </Link>
             </li>
-            {isLoggedIn && (
-              <li>
-                <Link href="/events/create" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200">
-                  + Create Event
-                </Link>
-              </li>
-            )}
+            <li>
+              <Link href="/events/create" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+                + Create Event
+              </Link>
+            </li>
             <li>
               <Link href="/find-me" className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">
                 Find Me

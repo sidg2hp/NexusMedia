@@ -86,9 +86,16 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  if (pathname === '/events/create') {
+    const { error } = await handleAuthorization(req);
+    if (error) {
+      return NextResponse.redirect(new URL('/register', req.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/api/events', '/api/media/upload-url', '/api/media', '/api/media/upload-local'],
+  matcher: ['/api/events', '/api/media/upload-url', '/api/media', '/api/media/upload-local', '/events/create'],
 };

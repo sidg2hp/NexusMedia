@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { PencilSquareIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 
 export default function EventActions({ event }: { event: any }) {
@@ -38,14 +38,40 @@ export default function EventActions({ event }: { event: any }) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) return;
+    
+    try {
+      const res = await fetch(`/api/events/${event.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        router.push('/events');
+        router.refresh();
+      } else {
+        const text = await res.text();
+        alert('Failed to delete event: ' + text);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while deleting the event.');
+    }
+  };
+
   return (
     <>
-      <button 
-        onClick={() => setIsEditing(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
-      >
-        <PencilSquareIcon className="w-4 h-4" /> Edit Event
-      </button>
+      <div className="flex items-center gap-3">
+        <button 
+          onClick={() => setIsEditing(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
+        >
+          <PencilSquareIcon className="w-4 h-4" /> Edit Event
+        </button>
+        <button 
+          onClick={handleDelete}
+          className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/40 text-red-200 rounded-lg transition-colors text-sm"
+        >
+          <TrashIcon className="w-4 h-4" /> Delete Event
+        </button>
+      </div>
 
       {isEditing && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
